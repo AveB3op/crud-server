@@ -4,8 +4,8 @@
   "main": "index.js",
   "author": "<zareckyivova@gmail.com>",
   "license": "MIT",
-  "scripts":{
-    "start":"node --experimental-modules index.mjs"
+  "scripts": {
+    "start": "node --experimental-modules index.mjs"
   },
   "dependencies": {
     "express": "^4.16.3",
