@@ -1,0 +1,14 @@
+{
+  "name": "crud-server",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "<zareckyivova@gmail.com>",
+  "license": "MIT",
+  "scripts":{
+    "start":"node --experimental-modules index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "mongoose": "^5.1.1"
+  }
+}
