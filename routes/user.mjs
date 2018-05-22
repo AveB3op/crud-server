@@ -1,5 +1,5 @@
 import express from 'express';
-import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients} from '../db/dbMethods';
+import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients, addUser} from '../db/dbMethods';
 
 const router = express.Router();
 
@@ -68,6 +68,17 @@ router.get("/search/:filter",(req, res) => {
     .catch(err=>{
       console.error(err);
     });
+});
+
+router.post("/signup",(req, res) => {
+  console.log(req.body);
+  addUser(req.body)
+  .then(user=>{
+    res.json(user);
+  })
+  .catch(err=>{
+    console.error(err);
+  })
 });
 
 export default router;

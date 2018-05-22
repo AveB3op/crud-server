@@ -22,3 +22,12 @@ export const clientSchema = new Schema(
       "country": String
     }
   }, {collection : 'Clients'});
+
+export const userSchema = new Schema(
+  {
+    userName: String,
+    password: String,
+    email: String,
+    roll: String
+  }, {collection : "Users"}
+);
