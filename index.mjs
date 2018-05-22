@@ -23,31 +23,32 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
 app.use(express.json());
 
-app.get("/getClients",(req, res) => {
+app.get("/user/get/all",(req, res) => {
   Client.find({},(err,clients)=>{
       res.json(clients);
     });
   console.log("Get clients");
 });
 
-app.post("/addClient", (req, res) => {
+app.post("/user/add", (req, res) => {
   let client = new Client(req.body);
   client.save((err,client)=>{
     if(err){return  console.error(err);}
-    res.json(req.body);
+    res.json(client);
   });
 });
 
-app.get("/deleteClient/:id",(req, res) => {
+app.get("/user/delete/:id",(req, res) => {
   Client.findByIdAndDelete(req.params.id,(err)=>{
     if(err) return console.error(err);
     res.send("deleted");
   })
 });
 
-app.get("/getClient/:id",(req, res) => {
+app.get("/user/get/id/:id",(req, res) => {
   console.log(req.params.id);
   Client.findById(req.params.id,(err,client)=>{
     if(err) return console.error(err);
@@ -56,7 +57,7 @@ app.get("/getClient/:id",(req, res) => {
   })
 });
 
-app.post("/editClient/:id",(req, res) => {
+app.post("/user/edit/:id",(req, res) => {
   console.log(req.params.id);
   console.log(req.body);
   Client.findByIdAndUpdate(req.params.id,req.body,(err)=>{
@@ -67,9 +68,9 @@ app.post("/editClient/:id",(req, res) => {
 
 //TODO
 app.get("/user/search/:filter",(req, res) => {
-  console.log("test");
-  console.log(req.params.filter);
-  Client.find({general:{name: req.params.filter} }, (err, clientsList)=>{
+  let regExp = new RegExp('(^|.*)'+req.params.filter+'.*','i');
+
+  Client.find({$or:[{'general.firstName': regExp},{'general.lastName': regExp}]}, (err, clientsList)=>{
     if(err) console.log(err);
     console.log(clientsList);
     res.json(clientsList);
