@@ -1,12 +1,17 @@
 import express from 'express';
-import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients, addUser} from '../db/dbMethods';
+import jwt from 'jsonwebtoken';
+import expressJwt from 'express-jwt';
+import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients, addUser, checkUser, findUser, addHash} from '../db/dbMethods';
 
 const router = express.Router();
+const secret = 'Incode';
 
 router.use((req, res, next)=>{
   console.log('user router');
   next();
 });
+
+router.use(expressJwt({ secret: secret}).unless({path: ['/user/signup', '/user/signin', /\/user\/get\/.*/i]}));
 
 router.get("/get/all",(req, res) => {
     getAllClients()
@@ -20,6 +25,8 @@ router.get("/get/all",(req, res) => {
 });
 
 router.post("/add", (req, res) => {
+    console.log(req.get('Authorization'));
+    console.log(req.user);
     addClient(req.body)
     .then(client=>{
       res.json(client);
@@ -30,13 +37,17 @@ router.post("/add", (req, res) => {
 });
 
 router.get("/delete/:id",(req, res) => {
-    deleteClient(req.params.id)
-    .then(response=>{
-      res.send("deleted");
-    })
-    .catch(err=>{
-      console.error(err);
-    });
+    if(req.user.role === "admin"){
+      deleteClient(req.params.id)
+      .then(response=>{
+        res.send("deleted");
+      })
+      .catch(err=>{
+        console.error(err);
+      });
+  }else{
+    res.status('403').send("Must be admin");
+  }
 });
 
 router.get("/get/id/:id",(req, res) => {
@@ -59,7 +70,7 @@ router.post("/edit/:id",(req, res) => {
     });
 });
 
-router.get("/search/:filter",(req, res) => {
+router.get("/get/search/:filter",(req, res) => {
     let regExp = new RegExp('(^|.*)'+req.params.filter+'.*','i');
     searchClients(regExp)
     .then(clientsList=>{
@@ -71,14 +82,48 @@ router.get("/search/:filter",(req, res) => {
 });
 
 router.post("/signup",(req, res) => {
-  console.log(req.body);
-  addUser(req.body)
+  addHash(req.body)
   .then(user=>{
-    res.json(user);
+    jwt.sign({email: user.email, role: user.role},secret,(err,token)=>{
+      if(err){throw err}
+
+      user.token = token;
+      addUser(user)
+      .then(newUser=>{
+        return res.send(newUser.token);
+      })
+
+    });
   })
   .catch(err=>{
     console.error(err);
   })
 });
+
+router.post("/signin",(req, res) => {
+  console.log(req.body);
+  findUser(req.body)
+  .then(user=>{
+    checkUser(user, req.body.password).
+    then(result => {
+      console.log(result);
+      if(result){
+        console.log(result);
+      res.status('200').send(result.token);
+    }else{
+      throw result;
+    };
+    })
+    .catch(err=>{
+      console.error(err);
+      res.status(401).send("Authorization failed");
+    })
+  })
+  .catch(err=>{
+    console.error(err);
+    res.status(401).send("Authorization failed");
+  })
+});
+
 
 export default router;

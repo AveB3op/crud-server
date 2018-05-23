@@ -1,6 +1,6 @@
-import {clientSchema, userSchema} from './schema';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import {clientSchema, userSchema} from './schema';
 
 const saltRounds = 10;
 
@@ -32,17 +32,33 @@ export function searchClients(searchFilter){
   return Client.find({$or:[{'general.firstName': searchFilter},{'general.lastName': searchFilter}]})
 }
 
-export function addUser(userData){
+export function addHash(userData){
   return bcrypt.hash(userData.password, saltRounds)
   .then(hash=>{
-      userData.password = hash;
-      let user = new User(userData);
-      return user.save();
+       userData.password = hash;
+       userData.role = "user";
+       return userData;
+      });
+  }
+
+
+export function addUser(userData){
+    let user = new User(userData);
+    return user.save();
+}
+
+export function findUser(userData){
+  return User.findOne({email:userData.email});
+}
+
+export function checkUser(user, password){
+
+  return bcrypt.compare(password, user.password)
+  .then(result=>{
+      if(result){return user}
+      else{ throw result}
   })
   .catch(err=>{
     console.error(err);
   })
 }
-console.log(bcrypt.compareSync('42', '$2b$10$HoRWwfsxPXiL8qBBQZbA1.eEOk4QF/0QAiNbYWSlalTs//HXv6aEC'));
-
-console.log(bcrypt.compareSync('872', '$2b$10$HoRWwfsxPXiL8qBBQZbA1.eEOk4QF/0QAiNbYWSlalTs//HXv6aEC'));

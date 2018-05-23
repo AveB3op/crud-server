@@ -28,6 +28,7 @@ export const userSchema = new Schema(
     userName: String,
     password: String,
     email: String,
-    roll: String
+    role: String,
+    token: String
   }, {collection : "Users"}
 );
