@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
+import { clientAdd, clientEdit, clientDelete } from '../ws/webSocketMethods';
 import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients, addUser, checkUser, findUser, addHash} from '../db/dbMethods';
 
 const router = express.Router();
@@ -29,6 +30,7 @@ router.post("/add", (req, res) => {
     console.log(req.user);
     addClient(req.body)
     .then(client=>{
+      clientAdd(client);
       res.json(client);
     })
     .catch(err=>{
@@ -40,6 +42,7 @@ router.get("/delete/:id",(req, res) => {
     if(req.user.role === "admin"){
       deleteClient(req.params.id)
       .then(response=>{
+        clientDelete(req.params.id)
         res.send("deleted");
       })
       .catch(err=>{
@@ -63,6 +66,7 @@ router.get("/get/id/:id",(req, res) => {
 router.post("/edit/:id",(req, res) => {
     editClient(req.params.id, req.body)
     .then(client=>{
+      clientEdit(client);
       res.json(client);
     })
     .catch(err=>{

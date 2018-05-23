@@ -1,6 +1,7 @@
 import express from 'express';
 import db from './db/';
 import router from './routes/user';
+import wss from './ws/webSocket';
 
 const app = express();
 
