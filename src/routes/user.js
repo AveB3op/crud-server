@@ -5,7 +5,7 @@ import { clientAdd, clientEdit, clientDelete } from '../ws/webSocketMethods';
 import {getAllClients, addClient, deleteClient, editClient, getClient, searchClients, addUser, checkUser, findUser, addHash} from '../db/dbMethods';
 
 const router = express.Router();
-const secret = 'Incode';
+const secret = process.env.SECRET_KEY;
 
 router.use((req, res, next)=>{
   console.log('user router');
@@ -26,8 +26,6 @@ router.get("/get/all",(req, res) => {
 });
 
 router.post("/add", (req, res) => {
-    console.log(req.get('Authorization'));
-    console.log(req.user);
     addClient(req.body)
     .then(client=>{
       clientAdd(client);
