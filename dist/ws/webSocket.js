@@ -22,18 +22,19 @@ function heartbeat() {
   this.isAlive = true;
 }
 
-// wss.on('connection', function connection(ws) {
-//
-// });
-
-
 wss.on('connection', function connection(ws) {
-
   ws.on('message', function incoming(data) {
     console.log('Roundtrip time: ' + Date.now() + ' ms');
-
     console.log('received:', data);
     ws.token = data;
+    _jsonwebtoken2.default.verify(ws.token, process.env.SECRET_KEY, function (err, token) {
+      ws.send(JSON.stringify({ type: "connect", email: token.email }));
+      wss.clients.forEach(function (el) {
+        if (el.token !== ws.token && ws.token) {
+          el.send(JSON.stringify({ type: "connected", message: "user is alive", token: token }));
+        }
+      });
+    });
   });
 
   ws.isAlive = true;
@@ -42,33 +43,43 @@ wss.on('connection', function connection(ws) {
 
   ws.on('close', function close() {
     console.log('disconnected');
-    _jsonwebtoken2.default.verify(ws.token, process.env.SECRET_KEY, function (err, token) {
-      console.log("This client is disconnected");
-      console.log(token);
-      wss.clients.forEach(function (el) {
-        el.send(JSON.stringify({ type: "message", message: "user id dead", token: token }));
+    if (ws.token) {
+      _jsonwebtoken2.default.verify(ws.token, process.env.SECRET_KEY, function (err, token) {
+        console.log("This client is disconnected");
+        console.log(token);
+
+        wss.clients.forEach(function (el) {
+          el.send(JSON.stringify({ type: "disconnected", message: "user id dead", token: token }));
+        });
       });
-    });
+    }
   });
 });
 
 var interval = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) {
-      _jsonwebtoken2.default.verify(ws.token, process.env.SECRET_KEY, function (err, token) {
+    _jsonwebtoken2.default.verify(ws.token, process.env.SECRET_KEY, function (err, token) {
+      if (ws.isAlive === false) {
         console.log("This client is dead");
         console.log(token);
         wss.clients.forEach(function (el) {
-          el.send(JSON.stringify({ type: "message", message: "user id dead", token: token }));
+          el.send(JSON.stringify({ type: "disconnected", message: "user id dead", token: token }));
         });
-      });
-      return ws.terminate();
-    };
+        return ws.terminate();
+      } else {
+        wss.clients.forEach(function (el) {
+          if (el.token !== ws.token && ws.token) {
+            el.send(JSON.stringify({ type: "connected", message: "user is alive", token: token }));
+          }
+        });
+      }
+    });
     ws.isAlive = false;
     ws.ping(noop);
+
     console.log(ws.token);
     console.log("he's alive");
   });
-}, 15000);
+}, 2000);
 
 exports.default = wss;

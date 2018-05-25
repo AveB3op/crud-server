@@ -62,3 +62,7 @@ export function checkUser(user, password){
     console.error(err);
   })
 }
+
+export function getAllUsers(){
+  return User.find({});
+}

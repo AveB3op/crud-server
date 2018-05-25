@@ -12,6 +12,10 @@ var _user = require('./routes/user');
 
 var _user2 = _interopRequireDefault(_user);
 
+var _userRoutes = require('./routes/userRoutes');
+
+var _userRoutes2 = _interopRequireDefault(_userRoutes);
+
 var _webSocket = require('./ws/webSocket');
 
 var _webSocket2 = _interopRequireDefault(_webSocket);
@@ -29,6 +33,7 @@ app.use(function (req, res, next) {
 app.use(_express2.default.json());
 
 app.use('/user', _user2.default);
+app.use('/users', _userRoutes2.default);
 
 console.log("start");
 

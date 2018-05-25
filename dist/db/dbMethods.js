@@ -13,6 +13,7 @@ exports.addHash = addHash;
 exports.addUser = addUser;
 exports.findUser = findUser;
 exports.checkUser = checkUser;
+exports.getAllUsers = getAllUsers;
 
 var _bcrypt = require('bcrypt');
 
@@ -84,4 +85,8 @@ function checkUser(user, password) {
   }).catch(function (err) {
     console.error(err);
   });
+}
+
+function getAllUsers() {
+  return User.find({});
 }
