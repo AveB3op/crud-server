@@ -71,6 +71,6 @@ var interval = setInterval(function ping() {
     ws.isAlive = false;
     ws.ping(noop);
   });
-}, 2000);
+}, 15000);
 
 exports.default = wss;

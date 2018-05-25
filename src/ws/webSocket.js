@@ -61,6 +61,6 @@ const interval = setInterval(function ping() {
     ws.ping(noop);
 
   });
-}, 2000);
+}, 15000);
 
 export default wss ;
